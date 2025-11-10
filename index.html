@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Aviamasters — играть онлайн | Официальная игра BGaming</title>
+<link rel="icon" href="images/plane.png" type="image/png"/>
+
+<style>
+  /* ===== FONTS ===== */
+  @font-face { font-family:'Etude Noire'; src:url('fonts/Etude Noire Medium.ttf') format('truetype'); font-weight:500; font-display:swap; }
+  @font-face { font-family:'Panton Narrow'; src:url('fonts/PantonNarrowDemo-Black.otf') format('opentype'); font-weight:900; font-display:swap; }
+
+  :root{
+    --ink:#eaf0ff; --muted:rgba(234,240,255,.78); --sub:#9eb0da;
+
+    /* Telegram (как в твоём референсе) */
+    --tgA:#2AABEE; --tgB:#00E5FF;
+
+    --glass:rgba(255,255,255,.06);
+    --glass-strong:rgba(255,255,255,.08);
+    --gborder:rgba(255,255,255,.14);
+
+    --shadow-1:0 22px 80px rgba(0,0,0,.55);
+    --shadow-2:0 12px 36px rgba(0,0,0,.45);
+
+    --container:1220px;
+    --radius:26px;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  img{display:block;max-width:100%;height:auto}
+
+  /* ===== GLOBAL BACKGROUND (бесшовный) ===== */
+  body{
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Etude Noire",Arial,sans-serif;
+    color:var(--ink);
+    background:#0b1122;
+    -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    overflow-x:hidden;
+  }
+  body::before, body::after{
+    content:""; position:fixed; inset:-20vmax; z-index:-2; pointer-events:none;
+    background:
+      radial-gradient(1200px 800px at 15% -10%, rgba(126,171,255,.18), transparent 60%),
+      radial-gradient(900px 700px at 110% 10%, rgba(70,210,255,.10), transparent 60%),
+      radial-gradient(1200px 800px at 50% 120%, rgba(10,40,80,.55), transparent 60%),
+      linear-gradient(180deg,#0a1222,#0d1832 40%,#0b1328 100%);
+    filter:none;
+  }
+  body::after{
+    z-index:-1; opacity:.35; mix-blend-mode:overlay;
+    background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 120 120"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.06"/></svg>');
+    background-size:180px 180px;
+  }
+
+  .container{max-width:var(--container);margin:0 auto;padding:0 20px}
+
+  /* ===== TOPBAR ===== */
+  .topbar{position:sticky;top:0;z-index:40;background:rgba(8,16,35,.55);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.06)}
+  .topbar__in{height:68px;display:flex;align-items:center;justify-content:space-between}
+  .logo{height:40px}
+  .badges{display:flex;gap:10px}
+  .badge{padding:8px 12px;border-radius:999px;color:#cfe0ff;font-size:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06)}
+
+  /* ===== HERO ===== */
+  .hero{padding:84px 0 28px}
+  .hero__center{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px}
+  .title{
+    font-family:'Panton Narrow',system-ui,sans-serif;
+    font-size: clamp(52px, 8.4vw, 116px);
+    line-height:1.02; letter-spacing:.012em;
+    text-shadow:0 10px 36px rgba(0,0,0,.45);
+  }
+  .title span{
+    display:block;
+    color:transparent;
+    background:linear-gradient(100deg,#ffffff,#e8eeff 38%,#c8d6ff 64%,#a9c4ff);
+    -webkit-background-clip:text;background-clip:text
+  }
+  .subtitle{color:var(--muted);max-width:760px}
+
+  /* ===== CTA ===== */
+  .ctas{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-top:16px}
+
+  .btn{
+    --py:18px; --px:32px;
+    display:inline-flex;align-items:center;justify-content:center;gap:12px;
+    padding:var(--py) var(--px);
+    min-width:300px; border-radius:999px;
+    text-transform:uppercase; letter-spacing:.06em; font-weight:900;
+    text-decoration:none; position:relative; isolation:isolate;
+    transition:transform .25s ease, box-shadow .25s ease, filter .25s ease, background .25s ease;
+  }
+  .btn .i{width:22px;height:22px}
+
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .btn-glass{
+    color:#edf3ff;
+    background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.07));
+    backdrop-filter: blur(22px) saturate(170%);
+    -webkit-backdrop-filter: blur(22px) saturate(170%);
+    border:1px solid rgba(255,255,255,.14);
+    box-shadow: 0 10px 22px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.22);
+    overflow:hidden;
+  }
+  .btn-glass::before{
+    content:""; position:absolute; inset:0; pointer-events:none;
+    clip-path: inset(0 round 999px);
+    background: conic-gradient(from 0deg,
+      rgba(142,227,255,.42), rgba(111,255,193,.30),
+      transparent 45%,
+      rgba(142,227,255,.42));
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude;
+    padding:1px; border-radius:1000px;
+    filter:blur(7px); opacity:.55; animation:spin 10s linear infinite;
+  }
+  .btn-glass:hover{transform:translateY(-1px); box-shadow:0 16px 30px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.24)}
+  .btn-glass:active{transform:translateY(0); box-shadow:0 10px 22px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.2)}
+
+  .btn-tg{
+    color:#06101c;
+    background:linear-gradient(145deg,var(--tgA),var(--tgB));
+    border:1px solid rgba(255,255,255,.12);
+    box-shadow:none;
+  }
+  .btn-tg:hover{ transform:translateY(-2px); filter:brightness(1.03); box-shadow:0 12px 28px rgba(0,0,0,.35) }
+  .btn-tg:active{ transform:translateY(0); box-shadow:0 10px 22px rgba(0,0,0,.40) }
+
+  /* ===== SECTION HEADERS ===== */
+  .section{padding:56px 0}
+  .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .h2{font-family:'Panton Narrow',system-ui,sans-serif;font-size:clamp(32px,4.8vw,62px)}
+  .note{color:var(--sub);font-size:14px}
+
+  /* ===== ОБ ИГРЕ ===== */
+  .videoCard{
+    overflow:visible;
+    display:grid;grid-template-columns:1.12fr 1fr;gap:22px;align-items:center;
+    background:var(--glass); border:1px solid var(--gborder);
+    border-radius:22px; padding:18px; backdrop-filter:blur(18px) saturate(170%);
+    box-shadow: var(--shadow-1);
+  }
+  .screen{position:relative;overflow:hidden;border-radius:16px;aspect-ratio:16/9;border:1px solid rgba(255,255,255,.14);background:#0b0f1c;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06), 0 20px 50px rgba(0,0,0,.55)}
+  .screen img{width:100%;height:100%;object-fit:cover}
+  .play{position:absolute;left:16px;bottom:16px;display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:999px;color:#0e141f;background:linear-gradient(180deg,#f9faff,#eaefff);border:1px solid rgba(255,255,255,.6);box-shadow:0 10px 26px rgba(0,0,0,.4)}
+  .play svg{width:16px;height:16px}
+  .p{color:var(--muted);line-height:1.75}
+  .inlineCTA{margin-top:16px;position:relative}
+  .plane-wrap{position:relative; display:inline-block}
+  .plane-near-button{position:absolute; right:-86px; bottom:-16px; width:110px; transform:rotate(-10deg); pointer-events:none; filter:drop-shadow(0 10px 16px rgba(0,0,0,.45)); z-index:3}
+
+  /* ===== ПЛАШКИ ===== */
+  .afterAbout{padding-top:20px}
+  .pillRow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  .pill{
+    position:relative; overflow:hidden; border-radius:20px; padding:18px;
+    background:var(--glass-strong); border:1px solid var(--gborder);
+    backdrop-filter: blur(20px) saturate(180%); box-shadow: var(--shadow-2);
+    transform:translateZ(0);
+  }
+  .pill::before{
+    content:""; position:absolute; inset:-2px; border-radius:inherit; pointer-events:none;
+    background:
+      radial-gradient(80% 140% at -10% -10%, rgba(255,255,255,.24), transparent 60%),
+      conic-gradient(from 0deg, rgba(255,210,246,.25), rgba(150,210,255,.25), transparent 70%);
+    mix-blend-mode:screen; filter:blur(18px); opacity:.6;
+  }
+  .pill h4{font-family:'Etude Noire',system-ui;margin-bottom:6px;letter-spacing:.02em}
+  .pill p{color:var(--muted)}
+
+  /* === GLASS TABLES — polished to match site === */
+  .specs {
+    width: 100%;
+    border-radius: 22px;
+    background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+    backdrop-filter: blur(22px) saturate(180%);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+    border: 1px solid rgba(255,255,255,.14);
+    box-shadow: 0 24px 60px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.10);
+    overflow: hidden;
+    position: relative;
+    isolation: isolate;
+  }
+  .specs::before{
+    content:"";
+    position:absolute; inset:0; pointer-events:none;
+    background:
+      radial-gradient(100% 60% at 0% 0%, rgba(255,255,255,.14), transparent 60%),
+      radial-gradient(80% 60% at 100% 0%, rgba(142,227,255,.16), transparent 60%),
+      radial-gradient(60% 40% at 50% 100%, rgba(255,255,255,.06), transparent 70%);
+    mix-blend-mode:screen;
+    z-index:0;
+  }
+  .specs table{ width:100%; border-collapse:separate; border-spacing:0; position:relative; z-index:1; }
+  .specs thead th{
+    text-align:left; padding:20px 24px;
+    font-family:'Panton Narrow', system-ui, sans-serif;
+    font-weight:900; font-size:14px; text-transform:uppercase; letter-spacing:.08em; color:#f1f4ff;
+    background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04));
+    position:sticky; top:0;
+  }
+  .specs thead th:first-child{ border-top-left-radius:22px }
+  .specs thead th:last-child{ border-top-right-radius:22px }
+  .specs thead th::after{ content:""; position:absolute; left:0; right:0; bottom:0; height:1px; background:linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent); }
+  .specs tbody tr{ transition:background .25s ease, transform .25s ease; background:rgba(255,255,255,.025); }
+  .specs tbody tr:nth-child(odd){ background:rgba(255,255,255,.035) }
+  .specs tbody tr:hover{ background:rgba(255,255,255,.06); transform:translateY(-1px); }
+  .specs td{ padding:18px 24px; font-size:15px; color:#e3ecff; position:relative; vertical-align:top; }
+  .specs tbody tr:not(:last-child) td::after{ content:""; position:absolute; left:24px; right:24px; bottom:0; height:1px; background:rgba(255,255,255,.06); }
+  .specs .k{ width:42%; color:#d8e7ff; font-weight:700; }
+  .chip{ display:inline-block; padding:.42em .78em; border-radius:999px; background:linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06)); border:1px solid rgba(255,255,255,.22); box-shadow: inset 0 1px 0 rgba(255,255,255,.28); font-size:.94em; color:#f5f8ff; }
+
+  /* --- FIX сравнения: цельная подсветка средней колонки --- */
+  .specs.specs--compare tbody tr,
+  .specs.specs--compare tbody tr:nth-child(odd){ background: transparent; }
+  .specs.specs--compare tbody tr:hover{ background: transparent; transform:none; }
+  .specs.specs--compare td:nth-child(2),
+  .specs.specs--compare th:nth-child(2){ position: relative; }
+  .specs.specs--compare td:nth-child(2)::before,
+  .specs.specs--compare td:nth-child(2)::after,
+  .specs.specs--compare th:nth-child(2)::before,
+  .specs.specs--compare th:nth-child(2)::after{
+    content:""; position:absolute; top:0; bottom:0; width:1px; opacity:.5; background: rgba(255,255,255,.10);
+  }
+  .specs.specs--compare td:nth-child(2)::before,
+  .specs.specs--compare th:nth-child(2)::before{ left:0 }
+  .specs.specs--compare td:nth-child(2)::after,
+  .specs.specs--compare th:nth-child(2)::after{ right:0 }
+  .specs.specs--compare tbody tr:not(:last-child) td:last-child::after{
+    content:""; position:absolute; left:22px; right:22px; bottom:0; height:1px; background: rgba(255,255,255,.06);
+  }
+  .specs.specs--compare thead th:nth-child(2){
+    background:
+      linear-gradient(180deg, rgba(42,171,238,.24), rgba(255,255,255,0) 70%),
+      linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04));
+  }
+
+  .tableWrap{ overflow:auto; border-radius:22px;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
+            mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
+  }
+  .tableWrap::-webkit-scrollbar{ height:10px }
+  .tableWrap::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.16); border-radius:999px; border:2px solid transparent; }
+
+  @media (max-width: 680px){
+    .specs table{ display:block }
+    .specs thead{ display:none }
+    .specs tbody{ display:grid; gap:10px; padding:14px }
+    .specs tr{ display:grid; grid-template-columns:1fr; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.12); border-radius:16px; box-shadow:0 8px 22px rgba(0,0,0,.35); overflow:hidden; }
+    .specs td{ display:block; padding:14px 16px }
+    .specs td.k{ background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02)); font-weight:800; color:#f1f5ff; border-bottom:1px solid rgba(255,255,255,.10) }
+    .specs tbody tr:not(:last-child) td::after{ display:none }
+  }
+
+  /* ===== FAQ / FOOTER ===== */
+  details{border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:12px;background:rgba(255,255,255,.05)}
+  details+details{margin-top:10px}
+  summary{cursor:pointer}
+  details p{color:var(--muted);margin-top:8px}
+  footer{padding:40px 0}
+  .foot{background:var(--glass);border:1px solid var(--gborder);border-radius:16px;text-align:center;padding:16px;color:#cfe0ff}
+
+  /* ===== APPEAR ANIMATIONS / EFFECTS PACK ===== */
+  @keyframes floatY { from{ transform:translateY(0) } 50%{ transform:translateY(-6px) } to{ transform:translateY(0) } }
+  @keyframes titleWave { from{ background-position:0% 50% } to{ background-position:200% 50% } }
+  @keyframes shineSweep { from{ transform:translateX(-140%) skewX(-20deg) } to{ transform:translateX(180%) skewX(-20deg) } }
+  @keyframes softPulse { 0%,100%{ box-shadow:0 0 0 rgba(42,171,238,0) } 50%{ box-shadow:0 0 34px rgba(42,171,238,.22) } }
+  @keyframes fadeUp { from{ opacity:0; transform:translateY(16px) } to{ opacity:1; transform:none } }
+
+  .title span{ background-image:linear-gradient(100deg,#fff,#e8eeff 33%,#9dd8ff 50%,#a9c4ff 66%,#fff); background-size:200% 100%; animation: titleWave 9s linear infinite; }
+  .plane-near-button{ animation: floatY 3.8s ease-in-out infinite }
+
+  .videoCard, .pill, .specs{ transition: transform .35s ease, box-shadow .35s ease, outline-color .35s ease; will-change: transform; }
+  .videoCard:hover, .pill:hover{ transform: translateY(-2px); box-shadow: 0 28px 80px rgba(0,0,0,.55); }
+
+  .tilt{ transform-style: preserve-3d; }
+  .tilt .tilt-shine{ content:""; position:absolute; inset:-1px; border-radius:inherit; pointer-events:none;
+    background: radial-gradient(600px 200px at var(--mx,50%) var(--my,50%), rgba(255,255,255,.14), transparent 60%);
+    mix-blend-mode:screen; opacity:.4; transition:opacity .2s ease;
+  }
+  .tilt:hover .tilt-shine{ opacity:.6 }
+
+  .magnet{ transition: transform .15s ease; will-change: transform; }
+  .magnet:hover{ animation: softPulse 1.8s ease-in-out infinite }
+
+  .btn.btn-glass::after, .btn.btn-tg::after{
+    content:""; position:absolute; top:-20%; bottom:-20%; width:40%;
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.35) 50%, rgba(255,255,255,0) 100%);
+    filter: blur(6px); border-radius:40px; transform:translateX(-140%) skewX(-20deg); pointer-events:none;
+  }
+  .btn:hover::after{ animation: shineSweep 1.2s ease }
+
+  .reveal{ opacity:0; transform:translateY(12px) }
+  .reveal.shown{ animation: fadeUp .6s both }
+  .reveal[data-delay="xs"].shown{ animation-delay:.05s }
+  .reveal[data-delay="s"].shown{ animation-delay:.12s }
+  .reveal[data-delay="m"].shown{ animation-delay:.22s }
+  .reveal[data-delay="l"].shown{ animation-delay:.34s }
+
+  .scroll-progress{
+    position: fixed; inset:0 0 auto 0; height:3px; z-index:60;
+    background: linear-gradient(90deg, #2AABEE, #00E5FF);
+    width:0%; box-shadow:0 0 18px rgba(0,229,255,.35);
+  }
+
+  .cursor-dot{
+    position: fixed; top:0; left:0; width:10px; height:10px; border-radius:50%;
+    background: radial-gradient(circle, rgba(255,255,255,.95) 0, rgba(42,171,238,.7) 60%, rgba(42,171,238,0) 70%);
+    pointer-events: none; opacity:.0; transform: translate(-50%,-50%) scale(.9);
+    mix-blend-mode:screen; filter: blur(.3px);
+    transition: opacity .2s ease;
+  }
+  @media (hover:hover){ body:hover .cursor-dot{ opacity:.9 } }
+
+  @media (prefers-reduced-motion: reduce){
+    .title span, .plane-near-button, .btn::after, .magnet:hover,
+    .reveal.shown, .tilt, .tilt .tilt-shine{ animation:none !important; transition:none !important }
+  }
+
+  /* ===== ADAPTIVE ===== */
+  @media (max-width: 1080px){ .videoCard{grid-template-columns:1fr} }
+  @media (max-width: 860px){ .pillRow{grid-template-columns:1fr} .ctas .btn{min-width:100%} }
+  /* === FIX: аккуратный вид Telegram-кнопки === */
+/* ===== PROMO MODAL ===== */
+.promo-overlay{
+  position: fixed; inset: 0; z-index: 80;
+  display: grid; place-items: center;
+  background: rgba(5,10,20,.55);
+  backdrop-filter: blur(2.5px);
+  -webkit-backdrop-filter: blur(2.5px);
+  opacity: 0; pointer-events: none;
+  transition: opacity .26s ease;
+}
+.promo-overlay.is-open{ opacity:1; pointer-events:auto; }
+
+.promo-card{
+  width: min(92vw, 520px);
+  background: #fff;
+  color:#111827;
+  border-radius: 22px;
+  box-shadow: 0 40px 120px rgba(0,0,0,.45);
+  padding: 28px 26px 26px;
+  position: relative;
+  text-align:center;
+  transform: translateY(10px) scale(.98);
+  transition: transform .26s ease, opacity .26s ease;
+  opacity: 0;
+}
+.promo-overlay.is-open .promo-card{
+  transform: none; opacity:1;
+}
+
+.promo-close{
+  position:absolute; top:10px; right:12px;
+  width:28px; height:28px; line-height:26px;
+  border-radius:50%; border:0; cursor:pointer;
+  background: rgba(0,0,0,.06);
+  color:#6b7280; font-size:18px; font-weight:700;
+  transition: background .2s ease, transform .2s ease;
+}
+.promo-close:hover{ background: rgba(0,0,0,.12); transform: rotate(90deg) }
+
+.promo-plane{
+  width:110px; height:auto; margin:-8px auto 6px;
+  display:block; filter: drop-shadow(0 10px 16px rgba(0,0,0,.25));
+  animation: promoFloat 3.8s ease-in-out infinite;
+}
+@keyframes promoFloat { 50%{ transform: translateY(-6px) rotate(-2deg) } }
+
+.promo-title{
+  font-family:'Panton Narrow',system-ui,sans-serif;
+  font-size: clamp(28px, 4.6vw, 36px);
+  text-transform:uppercase; letter-spacing:.02em;
+  color:#f59e0b; /* насыщённый янтарный */
+  margin: 4px 0 8px;
+}
+.promo-text{
+  font-size: 20px; line-height:1.35;
+  color:#1f2937; margin: 0 6px 18px;
+}
+
+.promo-cta{
+  display:inline-flex; align-items:center; justify-content:center;
+  min-width: 220px; padding: 16px 26px; border-radius: 999px;
+  background: linear-gradient(145deg,#f2a30f,#f59e0b 30%,#fb8c00 100%);
+  color:#fff; font-weight:900; text-decoration:none; text-transform:uppercase; letter-spacing:.04em;
+  box-shadow: 0 12px 28px rgba(245,158,11,.35), inset 0 1px 0 rgba(255,255,255,.5);
+  border: 1px solid rgba(255,255,255,.5);
+  transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+}
+.promo-cta:hover{ transform: translateY(-1px); filter: brightness(1.02); box-shadow: 0 16px 34px rgba(245,158,11,.45) }
+.promo-cta:active{ transform: translateY(0) }
+
+/* уважение к reduced-motion */
+@media (prefers-reduced-motion: reduce){
+  .promo-overlay, .promo-card, .promo-plane, .promo-cta{ transition:none !important; animation:none !important }
+}
+
+/* клипуем все визуальные эффекты внутри капсулы */
+.btn-tg{ position: relative; overflow: hidden; }
+
+/* отключаем пульс-тень у magnet на tg-кнопке,
+   чтобы не было серого «пятна» между кнопками */
+.btn-tg.magnet:hover{ animation: none !important; }
+
+/* оставляем бегущий блик, но делаем его компактнее */
+.btn-tg::after{
+  top:-12% !important;
+  bottom:-12% !important;
+  width:34% !important;
+  filter: blur(5px) !important;
+}
+</style>
+</head>
+<body>
+
+<!-- SCROLL PROGRESS BAR -->
+<div class="scroll-progress" aria-hidden="true"></div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="container topbar__in">
+    <img src="images/logo.png" alt="Aviamasters Logo" class="logo">
+    <div class="badges">
+      <div class="badge">BGaming</div>
+      <div class="badge">Provably Fair</div>
+      <div class="badge">24/7</div>
+    </div>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container hero__center reveal">
+    <h1 class="title"><span>ПОЛЁТ</span> К ВЫИГРЫШАМ</h1>
+    <p class="subtitle">Быстрый вход. Понятные правила. Максимальный множитель — х250.</p>
+    <div class="ctas">
+      <a href="https://lbgame777.xyz/5zb7N7" class="btn btn-glass magnet">
+        <img class="i" src="images/www.png" alt=""> играть в браузере
+      </a>
+      <a href="https://t.me/Lucky_Bear_SpinPro_Bot/app?startapp=bXN0PTB4MzlkNGYwNmEmbT1JTElBJmM9U0VPQVZJQTE" class="btn btn-tg magnet">
+        <img class="i" src="images/tgw.png" alt=""> играть в telegram
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ОБ ИГРЕ -->
+<section class="section">
+  <div class="container head reveal">
+    <h2 class="h2">Об игре</h2>
+    <div class="note">коротко и по делу</div>
+  </div>
+
+  <div class="container videoCard tilt reveal">
+    <div class="screen">
+      <img src="images/promo.gif" alt="Геймплей Aviamaster">
+      <div class="play">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+        Просмотр геймплея
+      </div>
+    </div>
+    <div class="vtext">
+      <p class="p">
+        Aviamasters – игра от BGaming, где вы делаете ставку до взлёта и наблюдаете, как множитель растёт в реальном времени. Чем больше бонусов соберёт самолёт во время полёта — тем выше выигрыш. Игра отлично работает на любых устройствах.
+      </p>
+      <div class="inlineCTA">
+        <span class="plane-wrap">
+          <a href="https://lbgame777.xyz/5zb7N7" class="btn btn-glass magnet" style="min-width:300px;">
+            <img class="i" src="images/www.png" alt=""> играть в браузере
+          </a>
+          <img src="images/plane.png" alt="Самолёт" class="plane-near-button">
+        </span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ТРИ ПЛАШКИ -->
+<section class="section afterAbout">
+  <div class="container pillRow">
+    <div class="pill tilt reveal"><h4>Множитель</h4><p><strong style="font-size:22px">x250</strong> — собирайте бонусы, множитель растёт.</p></div>
+    <div class="pill tilt reveal"><h4>Скорости</h4><p>Четыре режима скорости под ваш стиль.</p></div>
+    <div class="pill tilt reveal"><h4>Provably Fair</h4><p>Каждый раунд — проверяемая честность.</p></div>
+  </div>
+</section>
+
+<!-- ХАРАКТЕРИСТИКИ -->
+<section class="section">
+  <div class="container head reveal"><h2 class="h2">Характеристики</h2></div>
+  <div class="container tableWrap reveal">
+    <div class="specs tilt">
+      <table>
+        <thead>
+          <tr><th class="k">Параметр</th><th>Значение</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="k">Максимальный множитель</td><td><span class="chip">x250</span></td></tr>
+          <tr><td class="k">Автопилот</td><td><span class="chip">Есть</span></td></tr>
+          <tr><td class="k">Волатильность</td><td>Средняя</td></tr>
+          <tr><td class="k">Тип</td><td>Видео</td></tr>
+          <tr><td class="k">Поставщик</td><td>BGaming</td></tr>
+          <tr><td class="k">Тема</td><td>Авиация, самолёт</td></tr>
+          <tr><td class="k">Дата релиза</td><td>02.07.2024</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- СРАВНЕНИЕ -->
+<section class="section">
+  <div class="container head reveal"><h2 class="h2">Чем отличается от краш-игр</h2></div>
+  <div class="container tableWrap reveal">
+    <div class="specs specs--compare tilt">
+      <table>
+        <!-- цельная подсветка средней колонки -->
+        <colgroup>
+          <col class="col-k"><col class="col-accent"><col class="col-other">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Параметр</th>
+            <th>Aviamaster</th>
+            <th>Краш-игры</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="k">Тип</td>
+            <td>Видеослот с символами и множителями</td>
+            <td>Растущий коэффициент до остановки</td>
+          </tr>
+          <tr>
+            <td class="k">Управление</td>
+            <td>Шаги, бонусы, препятствия</td>
+            <td>Ставка и фиксирование коэффициента</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section">
+  <div class="container head reveal"><h2 class="h2">Частые вопросы</h2></div>
+  <div class="container" style="display:grid;gap:12px">
+    <details class="reveal"><summary>Как начать играть?</summary><p> Перейдите по нашим официальным ссылкам выше, выберите ставку и запускайте раунд. Управляйте риском и следите за ростом множителя. </p></details>
+    <details class="reveal"><summary>Есть ли мобильная версия?</summary><p>Да, игра запускается в мобильном браузере, а также доступна прямо в Telegram. </p></details>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="foot reveal">
+      <p>Играйте ответственно. Только для лиц старше 18 лет.</p>
+      <p>© 2025 Aviamasters. Все права защищены.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ===== REVEAL with auto-stagger ===== */
+(function(){
+  const els = [...document.querySelectorAll('.reveal')];
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        const idx = els.indexOf(e.target);
+        const delays = ['xs','s','m','l'];
+        e.target.setAttribute('data-delay', delays[idx % delays.length]);
+        e.target.classList.add('shown');
+        io.unobserve(e.target);
+      }
+    });
+  },{threshold:.14});
+  els.forEach(el=>io.observe(el));
+})();
+
+/* ===== very light parallax of background sparkles ===== */
+(function(){
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReduced) return;
+  let raf, cx=0, cy=0;
+  const move = (e)=>{
+    const x = e.clientX || (e.touches && e.touches[0].clientX);
+    const y = e.clientY || (e.touches && e.touches[0].clientY);
+    if (x==null) return;
+    cx = (x/window.innerWidth - .5)*2;
+    cy = (y/window.innerHeight - .5)*2;
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(()=>{ document.body.style.backgroundPosition = `${-cx*10}px ${-cy*10}px`;});
+  };
+  window.addEventListener('mousemove', move, {passive:true});
+  window.addEventListener('touchmove', move, {passive:true});
+})();
+
+/* ===== 3D Tilt for .tilt ===== */
+(function(){
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReduced) return;
+  const tilts = document.querySelectorAll('.tilt');
+  tilts.forEach(card=>{
+    card.style.transformPerspective = '900px';
+    const shine = document.createElement('i');
+    shine.className = 'tilt-shine';
+    card.style.position = 'relative';
+    card.appendChild(shine);
+
+    const max = 8; // градусов
+    const onMove = (e)=>{
+      const r = card.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width;
+      const py = (e.clientY - r.top) / r.height;
+      const rx = (py - .5) * -max;
+      const ry = (px - .5) *  max;
+      card.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg) translateZ(0)`;
+      card.style.setProperty('--mx', (px*100)+'%');
+      card.style.setProperty('--my', (py*100)+'%');
+    };
+    const reset = ()=>{ card.style.transform = ''; };
+    card.addEventListener('mousemove', onMove);
+    card.addEventListener('mouseleave', reset);
+    card.addEventListener('touchmove', (e)=>{ if(e.touches[0]) onMove(e.touches[0]) }, {passive:true});
+    card.addEventListener('touchend', reset);
+  });
+})();
+
+/* ===== Magnetic buttons ===== */
+(function(){
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReduced) return;
+  const magnets = document.querySelectorAll('.magnet');
+  magnets.forEach(btn=>{
+    const strength = 18;
+    const onMove = (e)=>{
+      const r = btn.getBoundingClientRect();
+      const x = e.clientX - (r.left + r.width/2);
+      const y = e.clientY - (r.top + r.height/2);
+      btn.style.transform = `translate(${x/strength}px, ${y/strength}px)`;
+    };
+    const reset = ()=>{ btn.style.transform = 'translate(0,0)'; };
+    btn.addEventListener('mousemove', onMove);
+    btn.addEventListener('mouseleave', reset);
+  });
+})();
+
+/* ===== Scroll progress bar ===== */
+(function(){
+  const bar = document.querySelector('.scroll-progress');
+  if(!bar) return;
+  const onScroll = ()=>{
+    const h = document.documentElement;
+    const sc = h.scrollTop;
+    const max = h.scrollHeight - h.clientHeight;
+    const p = Math.max(0, Math.min(1, sc / max));
+    bar.style.width = (p*100) + '%';
+  };
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+})();
+
+/* ===== Cursor sparkles (desktop only) ===== */
+(function(){
+  if (window.matchMedia('(pointer: coarse)').matches) return;
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReduced) return;
+
+  const dot = document.createElement('i');
+  dot.className = 'cursor-dot';
+  document.body.appendChild(dot);
+  let raf;
+  const move = (e)=>{
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(()=>{ dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`; });
+  };
+  window.addEventListener('mousemove', move, {passive:true});
+
+  const burst = (cx, cy)=>{
+    for(let i=0;i<10;i++){
+      const s = document.createElement('span');
+      s.style.cssText = `
+        position:fixed; left:${cx}px; top:${cy}px; width:6px; height:6px; border-radius:50%;
+        background: radial-gradient(circle, #fff 0, rgba(0,229,255,.9) 60%, rgba(0,229,255,0) 70%);
+        pointer-events:none; mix-blend-mode:screen; transform:translate(-50%,-50%);
+      `;
+      document.body.appendChild(s);
+      const ang = Math.random()*Math.PI*2;
+      const dist = 40 + Math.random()*40;
+      const tx = Math.cos(ang)*dist;
+      const ty = Math.sin(ang)*dist;
+      s.animate([
+        { transform:`translate(${cx}px, ${cy}px) scale(1)`, opacity:1 },
+        { transform:`translate(${cx+tx}px, ${cy+ty}px) scale(.6)`, opacity:0 }
+      ], { duration: 600 + Math.random()*250, easing:'cubic-bezier(.22,.61,.36,1)' }).onfinish = ()=> s.remove();
+    }
+  };
+  window.addEventListener('click', (e)=> burst(e.clientX, e.clientY));
+})();
+</script>
+<!-- PROMO MODAL -->
+<div class="promo-overlay" id="promoModal" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="promo-card" role="document">
+    <button class="promo-close" aria-label="Закрыть" title="Закрыть">×</button>
+
+    <img class="promo-plane" src="images/plane.png" alt="" />
+
+    <h3 class="promo-title">Поздравляем!</h3>
+    <p class="promo-text">
+      Вам доступно <strong>20 бесплатных полётов</strong>
+    </p>
+
+    <a href="https://lbgame777.xyz/5zb7N7" class="promo-cta" id="promoCta">Забрать</a>
+  </div>
+</div>
+<script>
+/* ===== PROMO MODAL logic ===== */
+(function(){
+  const MODAL_ID = 'promoModal';
+  const CTA_ID = 'promoCta';
+  const SHOW_DELAY_MS = 10000;      // 10 секунд
+  const STORAGE_KEY = 'promo_seen_at';
+  const SHOW_EVERY_VISIT = true;    // показывать на каждом заходе
+  const COOLDOWN_HOURS = 24;        // раз в сутки
+
+  const modal = document.getElementById(MODAL_ID);
+  if(!modal) return;
+
+  const open = () => {
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden','false');
+    document.body.style.overflow = 'hidden'; // фикс скролла задника
+  };
+  const close = () => {
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden','true');
+    document.body.style.overflow = '';
+  };
+
+  // таймер показа (с учётом частоты)
+  const canShowNow = () => {
+    if (SHOW_EVERY_VISIT) return true;
+    try{
+      const prev = +localStorage.getItem(STORAGE_KEY) || 0;
+      const since = Date.now() - prev;
+      return since > COOLDOWN_HOURS * 3600 * 1000;
+    }catch(e){ return true; }
+  };
+
+  const schedule = () => {
+    if(!canShowNow()) return;
+    setTimeout(()=>{
+      // не показываем, если юзер уже кликнул на любую CTA (микроэвристика)
+      if (window.__ctaClicked) return;
+      open();
+      try{ localStorage.setItem(STORAGE_KEY, Date.now().toString()); }catch(e){}
+    }, SHOW_DELAY_MS);
+  };
+
+  // обработчики закрытия
+  modal.addEventListener('click', (e)=>{
+    if (e.target === modal || e.target.classList.contains('promo-close')) close();
+  });
+  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') close(); });
+
+  // CTA ведёт на игру и закрывает модалку
+  const cta = document.getElementById(CTA_ID);
+  if (cta){
+    cta.addEventListener('click', ()=>{ window.__ctaClicked = true; close(); }, {passive:true});
+  }
+
+  // не вмешиваться, если пользователь включил reduced-motion? —
+  // только убираем анимации, сам показ оставим.
+  schedule();
+})();
+</script>
+
+</body>
+</html>
